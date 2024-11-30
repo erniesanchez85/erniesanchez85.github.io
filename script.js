@@ -1,172 +1,178 @@
-:root[data-theme="light"] {
-    --bg-color: #f5f5f5;
-    --text-color: #2c3e50;
-    --header-bg: #2c3e50;
-    --card-bg: white;
-    --card-shadow: rgba(0,0,0,0.1);
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const steps = [
+        {
+            title: 'Initial Goal',
+            question: 'What do you want to do?',
+            placeholder: 'Enter your goal here...',
+            helper: 'Start with your basic goal idea',
+            examples: [
+                "I want to lose weight",
+                "I want to remodel my basement",
+                "I want to learn Spanish"
+            ]
+        },
+        {
+            title: 'Specific',
+            question: 'What exactly do you want to accomplish?',
+            placeholder: 'Be precise about what you want to achieve...',
+            helper: 'Include who, what, where, when, why, and how'
+        },
+        {
+            title: 'Measurable',
+            question: 'How will you track progress and measure success?',
+            placeholder: 'Define concrete criteria...',
+            helper: 'Use numbers, quantities, or clear indicators'
+        },
+        {
+            title: 'Achievable',
+            question: 'Is this realistic? What resources do you need?',
+            placeholder: 'List what you need to accomplish this...',
+            helper: 'Consider your capabilities and constraints'
+        },
+        {
+            title: 'Relevant',
+            question: 'Why is this goal important to you?',
+            placeholder: 'Explain why this matters...',
+            helper: 'Align with your broader objectives'
+        },
+        {
+            title: 'Time-bound',
+            question: 'When do you want to achieve this by?',
+            placeholder: 'Set your deadline...',
+            helper: 'Include specific dates or timeframes'
+        }
+    ];
 
-:root[data-theme="dark"] {
-    --bg-color: #1a1a1a;
-    --text-color: #e0e0e0;
-    --header-bg: #2c3e50;
-    --card-bg: #2c2c2c;
-    --card-shadow: rgba(255,255,255,0.1);
-}
+    let currentStep = 0;
+    const formData = {};
 
-body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 20px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: background-color 0.3s, color 0.3s;
-}
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const html = document.documentElement;
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-}
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', newTheme);
+        themeToggle.textContent = `Toggle ${currentTheme === 'light' ? 'Light' : 'Dark'} Mode`;
+    });
 
-header {
-    text-align: center;
-    padding: 20px;
-    background-color: var(--header-bg);
-    color: white;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    position: relative;
-}
+    // Initialize progress steps
+    const progressSteps = document.getElementById('progress-steps');
+    steps.forEach((step, index) => {
+        const stepElement = document.createElement('div');
+        stepElement.className = 'step';
+        stepElement.innerHTML = `
+            <div class="step-circle ${index === 0 ? 'active' : ''}">${index + 1}</div>
+            <div class="step-title">${step.title}</div>
+        `;
+        progressSteps.appendChild(stepElement);
+    });
 
-.theme-toggle {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    background-color: var(--card-bg);
-    color: var(--text-color);
-    cursor: pointer;
-    transition: transform 0.2s;
-}
+    // Function to update form content
+    function updateForm() {
+        const formContainer = document.getElementById('form-container');
+        const currentStepData = steps[currentStep];
 
-.progress-steps {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-}
+        formContainer.innerHTML = `
+            <h2>${currentStepData.question}</h2>
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="current-input"
+                    placeholder="${currentStepData.placeholder}"
+                    value="${formData[currentStep] || ''}"
+                >
+                <p class="helper-text">${currentStepData.helper}</p>
+            </div>
+            ${currentStep === 0 ? `
+                <div class="example-goals">
+                    ${currentStepData.examples.map(example => `
+                        <button class="example-goal">${example}</button>
+                    `).join('')}
+                </div>
+            ` : ''}
+            <div class="button-group">
+                ${currentStep > 0 ? `
+                    <button id="back-button">Back</button>
+                ` : '<div></div>'}
+                <button id="next-button" ${!formData[currentStep] ? 'disabled' : ''}>
+                    ${currentStep === steps.length - 1 ? 'Finish' : 'Next'}
+                </button>
+            </div>
+        `;
 
-.step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        // Add event listeners
+        const input = document.getElementById('current-input');
+        input.addEventListener('input', (e) => {
+            formData[currentStep] = e.target.value;
+            document.getElementById('next-button').disabled = !e.target.value;
+        });
 
-.step-circle {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: var(--card-bg);
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 8px;
-}
+        if (currentStep === 0) {
+            document.querySelectorAll('.example-goal').forEach(button => {
+                button.addEventListener('click', () => {
+                    input.value = button.textContent;
+                    formData[currentStep] = button.textContent;
+                    document.getElementById('next-button').disabled = false;
+                });
+            });
+        }
 
-.step-circle.active {
-    background-color: var(--header-bg);
-    color: white;
-}
+        const nextButton = document.getElementById('next-button');
+        nextButton.addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateForm();
+                updateProgress();
+            } else {
+                showSummary();
+            }
+        });
 
-.form-container {
-    background-color: var(--card-bg);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px var(--card-shadow);
-}
+        if (currentStep > 0) {
+            const backButton = document.getElementById('back-button');
+            backButton.addEventListener('click', () => {
+                currentStep--;
+                updateForm();
+                updateProgress();
+            });
+        }
+    }
 
-.input-group {
-    margin-bottom: 20px;
-}
+    function updateProgress() {
+        document.querySelectorAll('.step-circle').forEach((circle, index) => {
+            circle.classList.toggle('active', index <= currentStep);
+        });
+    }
 
-input {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    border: 2px solid var(--header-bg);
-    border-radius: 4px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    margin: 8px 0;
-}
+    function showSummary() {
+        document.getElementById('form-container').style.display = 'none';
+        const summaryContainer = document.getElementById('summary-container');
+        const summaryContent = document.getElementById('summary-content');
+        
+        summaryContent.innerHTML = steps.map((step, index) => `
+            <div class="summary-item">
+                <h3>${step.title}</h3>
+                <p>${formData[index]}</p>
+            </div>
+        `).join('');
 
-.helper-text {
-    font-size: 14px;
-    opacity: 0.8;
-    margin-top: 4px;
-}
+        summaryContainer.style.display = 'block';
 
-.button-group {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
+        document.getElementById('edit-button').addEventListener('click', () => {
+            summaryContainer.style.display = 'none';
+            document.getElementById('form-container').style.display = 'block';
+            currentStep = 0;
+            updateForm();
+            updateProgress();
+        });
 
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: var(--header-bg);
-    color: white;
-    transition: opacity 0.2s;
-}
+        document.getElementById('print-button').addEventListener('click', () => {
+            window.print();
+        });
+    }
 
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.example-goals {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.example-goal {
-    padding: 8px 12px;
-    background-color: var(--header-bg);
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.example-goal:hover {
-    transform: translateY(-2px);
-}
-
-.summary-container {
-    background-color: var(--card-bg);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px var(--card-shadow);
-}
-
-.summary-item {
-    margin-bottom: 15px;
-}
-
-.summary-item h3 {
-    margin-bottom: 5px;
-}
-
-.summary-item p {
-    background-color: var(--bg-color);
-    padding: 10px;
-    border-radius: 4px;
-}
+    // Initialize the form
+    updateForm();
+});
