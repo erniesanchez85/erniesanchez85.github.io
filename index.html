@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,9 @@
 </head>
 <body>
     <header>
+        <button id="theme-toggle" class="theme-toggle">
+            Toggle Dark Mode
+        </button>
         <h1>SMART Goals Builder</h1>
     </header>
     
@@ -22,5 +25,17 @@
             <p>Time-bound</p>
         </ul>
     </main>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            themeToggle.textContent = `Toggle ${currentTheme === 'light' ? 'Light' : 'Dark'} Mode`;
+        });
+    </script>
 </body>
 </html>
